@@ -1,9 +1,10 @@
 # HiTech Lowlife
 **Developed by Jose Dario Sanchez**
 
-*HiTech Lowlife* will be a desktop-based 2D platformer pixel art video game written in JavaScript and built using the Phaser library/framework.
+*HiTech Lowlife* will be a desktop-based 2D platformer pixel art video game written in JavaScript and built using the Phaser library/framework. Prototype in progress.
 
-Prototype in progress.
+Live demo [here](http://game.darzyx.com/).
+
 
 ## Credits
 
