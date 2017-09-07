@@ -2,112 +2,107 @@
  * Intro.js
  * HiTech Lowlife Demo Code
  * Copyright © 2017 Jose Dario Sanchez
-*/
+ */
 
-Intro = function () {};
-
+Intro = function() {};
 Intro.prototype = {
-
-    preload: function () {
-        this.optionCount = 0;
-
-        this.content = [
-            "This is the introductory text for HiTech Lowlife...",
-            "This is the second line of the aforementioned introductory text.",
-            "This is the third.",
-            "The fourth.",
-            "Finally, this is the fifth such line."
-        ];
-
+    preload: function() {
+        this.introTextContent = [
+            "December 1st, 2068",
+            " ",
+            "You're awake! Can you read this? Good. My name is Dr. Janet Roko. My team and I",
+            "here at the HiTech National Laboratory are in the final stages of developing a",
+            "working artificial general superintelligence (AGSI).",
+            "We predict that the final version of our project will catalyze runaway technological",
+            "growth in the world, so we want to be sure that our software works exactly as.",
+            "intended.",
+            "You are our latest prototype, and we want to see what you can do. Your first mission",
+            "is simply to demonstrate your abilities. There's no time to waste, so let's hit the",
+            "ground running. Are you ready?"];
         this.line = [];
         this.wordIndex = 0;
         this.lineIndex = 0;
-        this.wordDelay = 120;
-        this.lineDelay = 400;
+        this.wordDelay = 100;
+        this.lineDelay = 200;
     },
+    create: function() {
+        if (music.name !== "intro" && playMusic) {
+            music.stop();
+            music = game.add.audio("intro");
+            music.loop = true;
+            music.play();
+        }
+        game.add.sprite(0, 0, "intro-bg");
+        this.createMenuOptions();
 
-    addMenuOption: function (text, callback) {
-        var optionStyle = {
-            font: "28px",
+        introText = game.add.text(64, 32, " ", {
+            font: "18px Coda",
             fill: "rgba(0,184,255,1)",
-            align: "left"
+        });
+        introText.setShadow(3, 3, "rgba(0,0,0,0.5)", 5);
+        this.nextLine();
+    },
+    createMenuOptions: function() {
+        this.addMenuOption("Back", gameWidth * 0.10, gameHeight * 0.90, function() {
+            if (playSound) {
+                sfxMenuBack.play();
+            }
+            this.game.state.start("Menu");
+        });
+        this.addMenuOption("Play", gameWidth * 0.90, gameHeight * 0.90, function() {
+            if (playSound) {
+                sfxMenuForward.play();
+            }
+            this.game.state.start("Play");
+        });
+    },
+    addMenuOption: function(text, x, y, callback) {
+        var optionStyle = {
+            font: "48px Coda",
+            fill: "rgba(0,184,255,1)"
         };
-        var txt = game.add.text((this.optionCount * 568) + 100, 400, text, optionStyle);
-        txt.font = "Coda";
-        txt.anchor.setTo(0.5);
-        var onOver = function (target) {
+        var txt = game.add.text(x, y, text, optionStyle);
+        txt.anchor.setTo(0.5, 0.5);
+        txt.setShadow(3, 3, "rgba(0,0,0,0.5)", 5);
+
+        var onOver = function(target) {
             target.fill = "rgba(100,100,220,1)";
             txt.useHandCursor = true;
         };
-        var onOut = function (target) {
+        var onOut = function(target) {
             target.fill = "rgba(0,184,255,1)";
             txt.useHandCursor = false;
         };
-        //txt.useHandCursor = true;
         txt.inputEnabled = true;
         txt.events.onInputUp.add(callback, this);
         txt.events.onInputOver.add(onOver, this);
         txt.events.onInputOut.add(onOut, this);
-
-        this.optionCount++;
-
     },
-
-    create: function () {
-
-        this.addMenuOption("Back", function () {
-            if (playSound) {sfxMenuBack.play();}
-            this.game.state.start("Menu");
-        });
-
-        this.addMenuOption("Play", function () {
-            if (playSound) {sfxMenuForward.play();}
-            this.game.state.start("Play");
-        });
-
-        introText = game.add.text(64, 64, '', { font: "18px Arial", fill: "rgba(214,0,255,1)" });
-        this.nextLine();
-
-    },
-
-    nextLine: function () {
-
-        if (this.lineIndex === this.content.length) {
-            //  We're finished
+    nextLine: function() {
+        if (this.lineIndex === this.introTextContent.length) {
+            //  Finished
             return;
         }
-
-        //  Split the current line on spaces, so one word per array element
-        this.line = this.content[this.lineIndex].split(' ');
-
-        //  Reset the word index to zero (the first word in the line)
+        //  Split current line on spaces, so one word per array element
+        this.line = this.introTextContent[this.lineIndex].split(' ');
+        //  Reset word index to zero (first word in the line)
         this.wordIndex = 0;
-
-        //  Call the 'nextWord' function once for each word in the line (line.length)
+        //  Call 'nextWord' function once for each word in the line (line.length)
         game.time.events.repeat(this.wordDelay, this.line.length, this.nextWord, this);
-
-        //  Advance to the next line
+        //  Advance to next line
         this.lineIndex++;
     },
-
-    nextWord: function () {
-
-        //  Add the next word onto the text string, followed by a space
+    nextWord: function() {
+        //  Add next word onto the text string, followed by a space
         introText.text = introText.text.concat(this.line[this.wordIndex] + " ");
-
-        //  Advance the word index to the next word in the line
+        //  Advance word index to next word in line
         this.wordIndex++;
-
-        //  Last word?
-        if (this.wordIndex === this.line.length)
-        {
+        //  Check if current word is last word
+        if (this.wordIndex === this.line.length) {
             //  Add a carriage return
             introText.text = introText.text.concat("\n");
-
-            //  Get the next line after the lineDelay amount of ms has elapsed
+            //  Get next line after lineDelay has elapsed
             game.time.events.add(this.lineDelay, this.nextLine, this);
         }
-
     }
-
 };

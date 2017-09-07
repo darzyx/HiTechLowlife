@@ -14,21 +14,21 @@ Start.prototype = {
 
     preload: function () {
 
+        // Loading screen elements
         game.load.image("load-bg", "img/ui/load-bg.png");
         game.load.image("loading", "img/ui/loading.png");
         game.load.image("brand", "img/ui/logo-darzyx.png");
 
-        game.load.script("utils", "js/utils.js");
         game.load.script("Load", "js/states/Load.js");
 
-        // Google WebFont Loader
+        // Google WebFont
         game.load.script("WebFont", "//ajax.googleapis.com/ajax/libs/webfont/1.4.7/webfont.js");
 
     },
 
     create: function () {
 
-        // Google WebFont Loader
+        // Google WebFont
         WebFont.load({
           google: {
             families: ["Aldrich", "Audiowide", "Coda", "Orbitron", "VT323"]

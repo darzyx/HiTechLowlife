@@ -11,45 +11,21 @@ Options.prototype = {
     preload: function () {
         this.optionCount = 1;
     },
-
-    addMenuOption: function (text, callback) {
-        var optionStyle = {
-            font: "28px",
-            fill: "rgba(0,184,255,1)",
-            align: "left"
-        };
-        var txt = game.add.text(game.world.centerX, (this.optionCount * 70) + 100, text, optionStyle);
-        txt.font = "Coda";
-        txt.anchor.setTo(0.5);
-        var onOver = function (target) {
-            target.fill = "rgba(100,100,220,1)";
-            txt.useHandCursor = true;
-        };
-        var onOut = function (target) {
-            target.fill = "rgba(0,184,255,1)";
-            txt.useHandCursor = false;
-        };
-        //txt.useHandCursor = true;
-        txt.inputEnabled = true;
-        txt.events.onInputUp.add(callback, this);
-        txt.events.onInputOver.add(onOver, this);
-        txt.events.onInputOut.add(onOut, this);
-
-        this.optionCount++;
-    },
-
     create: function () {
         game.add.sprite(0, 0, "menu-bg");
-        var titleStyle = {
-            font: "bold 32px",
+
+        var text = game.add.text(gameWidth*0.5, gameHeight*0.2, "Options", {
+            font: "bold 48px Orbitron",
             fill: "rgba(214,0,255,1)",
             align: "center"
-        };
-        var text = game.add.text(game.world.centerX, 100, "Options", titleStyle);
-        text.font = "Orbitron";
+        });
         text.setShadow(3, 3, "rgba(0,0,0,0.5)", 5);
-        text.anchor.set(0.5);
-        this.addMenuOption(fullScreen ? "No Scale" : "Scale", function (target) {
+        text.anchor.set(0.5, 0.5);
+
+        this.createMenu();
+    },
+    createMenu: function() {
+        this.addMenuOption(fullScreen ? "No Scale" : "Scale", gameWidth*0.5, gameHeight*0.4, function (target) {
             sfxMenuForward.play();
             fullScreen = !fullScreen;
             target.text = fullScreen ? "No Scale" : "Scale";
@@ -63,7 +39,7 @@ Options.prototype = {
 
         });
 
-        this.addMenuOption(playMusic ? "Mute Music" : "Play Music", function (target) {
+        this.addMenuOption(playMusic ? "Mute Music" : "Play Music", gameWidth*0.5, gameHeight*0.6, function (target) {
 
             if (playSound) {sfxMenuForward.play();}
             playMusic = !playMusic;
@@ -72,19 +48,43 @@ Options.prototype = {
             music.volume = playMusic ? 1 : 0;
 
         });
-        this.addMenuOption(playSound ? "Mute Sound" : "Play Sound", function (target) {
+
+        this.addMenuOption(playSound ? "Mute Sound" : "Play Sound", gameWidth*0.5, gameHeight*0.8, function (target) {
 
             playSound = !playSound;
             if (playSound) {sfxMenuForward.play();}
             target.text = playSound ? "Mute Sound" : "Play Sound";
             sound.volume = playSound ? 1 : 0;
         });
-        this.addMenuOption("Back", function () {
+
+        this.addMenuOption("Back", gameWidth*0.10, gameHeight*0.9, function () {
 
             if (playSound) {sfxMenuBack.play();}
             this.game.state.start("Menu");
 
         });
+    },
+    addMenuOption: function(text, x, y, callback) {
+        var optionStyle = {
+            font: "48px Coda",
+            fill: "rgba(0,184,255,1)"
+        };
+        var txt = game.add.text(x, y, text, optionStyle);
+        txt.anchor.setTo(0.5, 0.5);
+        txt.setShadow(3, 3, "rgba(0,0,0,0.5)", 5);
+        txt.fixedToCamera = true;
 
+        var onOver = function(target) {
+            target.fill = "rgba(100,100,220,1)";
+            txt.useHandCursor = true;
+        };
+        var onOut = function(target) {
+            target.fill = "rgba(0,184,255,1)";
+            txt.useHandCursor = false;
+        };
+        txt.inputEnabled = true;
+        txt.events.onInputUp.add(callback, this);
+        txt.events.onInputOver.add(onOver, this);
+        txt.events.onInputOut.add(onOut, this);
     }
 };
