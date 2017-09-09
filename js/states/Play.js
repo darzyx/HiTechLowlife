@@ -23,15 +23,17 @@ var Play = function(game) {
     this.wasLocked;
     this.willJump;
     this.items;
-    this.enemies;
+    this.itemsShield;
+    this.normalEnemies; // Collide with collisionLayer
+    this.ghostEnemies;  // Do not collide with collisionLayer
     this.weapons;
     this.currentWeapon;
 };
 Play.prototype = {
     init: function() {
-        if (music.name !== "advanced-simulacra" && playMusic) {
+        if (music.name !== "by-product" && playMusic) {
             music.stop();
-            music = game.add.audio("advanced-simulacra");
+            music = game.add.audio("by-product");
             music.loop = true;
             music.play();
         }
@@ -48,7 +50,9 @@ Play.prototype = {
         this.wasLocked = false;
         this.willJump = false;
         this.items = null;
-        this.enemies = null;
+        this.itemsShield = null;
+        this.normalEnemies = null;
+        this.ghostEnemies = null;
         this.weapons = [];
         this.currentWeapon = 0;
         game.time.reset();
@@ -77,13 +81,15 @@ Play.prototype = {
         this.backgroundLayer.resizeWorld();
         // Level gravity strength
         game.physics.arcade.gravity.y = 0;
+
+        game.stage.smoothed = false;
     },
     createItemsAndObjects: function() {
         // Game objects
         this.ladders = game.add.group();
-        this.addObjectLadder(15, 23);
+        this.addObjectLadder(115, 22);
         this.platforms = this.add.physicsGroup();
-        var platform1 = new MovingPlatform(game, 1350, 700, "platform", this.platforms);
+        var platform1 = new ObjectPlatform(game, 67, 30, "platform", this.platforms);
         platform1.addMotionPath([{
             x: "+150",
             xSpeed: 2000,
@@ -116,10 +122,10 @@ Play.prototype = {
         this.platforms.callAll("start");
         // Game items
         this.items = game.add.group();
-        this.addItemMoney(21, 12);
-        this.addItemMoney(22, 12);
-        this.addItemMoney(23, 12);
-        this.addItemMoney(24, 12);
+        // this.addItemMoney(21, 12);
+
+        this.itemsShield = game.add.group();
+        this.addItemShield(10, 6);
     },
     createWeapons: function() {
         this.weapons.push(new Weapon.Pistol(this.game));
@@ -133,30 +139,28 @@ Play.prototype = {
         }
         this.input.keyboard.addKeyCapture([Phaser.Keyboard.SPACEBAR]);
         var changeKey = this.input.keyboard.addKey(Phaser.Keyboard.ENTER);
-        var changeKey = this.input.keyboard.addKey(Phaser.Keyboard.ENTER);
         changeKey.onDown.add(this.nextWeapon, this);
     },
     createEnemies: function() {
-        this.enemies = game.add.physicsGroup();
-        this.addEnemyWalker(5, 10);
-        this.addEnemyWalker(15, 10);
-        this.addEnemyNanobot(10, 5);
-        this.addEnemySpiderbot(35, 7);
-        this.addEnemyTurret(10, 5);
+        this.normalEnemies = game.add.physicsGroup();
+        this.ghostEnemies = game.add.physicsGroup();
+
+        this.addEnemyNanobot(18, 15);
+        this.addEnemyWalker(67, 10);
+
     },
     createPlayer: function() {
-        player = game.add.sprite(64, 64, "zed");
+        player = game.add.sprite(64, 100, "zed");
         game.physics.enable(player, Phaser.Physics.ARCADE);
-        player.body.setSize(48, 48, 0, 0);
+        player.body.setSize(24, 45, 12, 3);
         player.anchor.setTo(0.5, 1);
-        player.body.collideWorldBounds = true;
         player.body.maxVelocity.y = 700;
         player.body.gravity.y = 1000;
         player.health = 3;
         player.healthGracePeriod = 100;
         player.isAttacked = false;
-        player.walkSpeed = 250;
-        player.jumpSpeed = 500;
+        player.walkSpeed = 175;
+        player.jumpSpeed = 400;
         player.facing = "right";
         player.isStanding = true;
         player.isFiring = false;
@@ -185,11 +189,18 @@ Play.prototype = {
         player.animations.add("shootWalkRight", [42, 43, 44, 45, 46, 47], 10, true);
         cursors = game.input.keyboard.createCursorKeys();
         player.fireButton = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
-        game.camera.follow(player, Phaser.Camera.FOLLOW_PLATFORMER);
-        player.rifleAmmo = 75;
-        player.laserAmmo = 50;
-        player.flamethrowerAmmo = 30;
-        player.rocketAmmo = 8;
+        game.camera.follow(player, Phaser.Camera.FOLLOW_LOCKON);
+        player.rifleAmmo = 100;
+        player.laserAmmo = 100;
+        player.flamethrowerAmmo = 100;
+        player.rocketAmmo = 15;
+        player.shieldTimer = 350;
+        player.collideWorldBounds = false;
+        player.checkWorldBounds = true;
+        player.events.onOutOfBounds.add(function () {
+            player.health = 0;
+            this.hurtPlayer();
+        }, this);
     },
     createHUD: function() {
         this.addMenuOption("Quit", gameWidth * 0.98, gameHeight * 0.05, function() {
@@ -200,63 +211,71 @@ Play.prototype = {
             this.game.state.start("GameOver");
         });
         scoreText = game.add.text(gameWidth * 0.5, gameHeight * 0.05, "Score: " + score, {
-            font: "18px Coda",
-            fill: "rgba(0,184,255,1)"
+            font: "16px Orbitron",
+            fill: "rgb(165, 187, 255)"
         });
+        scoreText.stroke = "#000000";
+        scoreText.setShadow(3, 3, "rgba(0,0,0,0.75)", 5);
         scoreText.anchor.setTo(0.5, 0.5);
         scoreText.fixedToCamera = true;
         healthText = game.add.text(gameWidth * 0.5, gameHeight * 0.10, "Health: " + player.health, {
-            font: "18px Coda",
-            fill: "rgba(0,184,255,1)"
+            font: "16px Orbitron",
+            fill: "rgb(165, 187, 255)"
         });
+        healthText.setShadow(3, 3, "rgba(0,0,0,0.75)", 5);
         healthText.anchor.setTo(0.5, 0.5);
         healthText.fixedToCamera = true;
         pistolAmmoText = game.add.text(gameWidth * 0.02, gameHeight * 0.05, "Pistol: ∞", {
-            font: "14px Coda",
-            fill: "rgba(0,184,255,1)"
+            font: "13px Orbitron",
+            fill: "rgb(165, 187, 255)"
         });
+        pistolAmmoText.setShadow(3, 3, "rgba(0,0,0,0.75)", 5);
         pistolAmmoText.anchor.setTo(0, 0.5);
         pistolAmmoText.fixedToCamera = true;
         rifleAmmoText = game.add.text(gameWidth * 0.02, gameHeight * 0.10, "Rifle: " + player.rifleAmmo, {
-            font: "14px Coda",
-            fill: "rgba(0,184,255,1)"
+            font: "13px Orbitron",
+            fill: "rgb(165, 187, 255)"
         });
+        rifleAmmoText.setShadow(3, 3, "rgba(0,0,0,0.75)", 5);
         rifleAmmoText.anchor.setTo(0, 0.5);
         rifleAmmoText.fixedToCamera = true;
         laserAmmoText = game.add.text(gameWidth * 0.02, gameHeight * 0.15, "Laser: " + player.laserAmmo, {
-            font: "14px Coda",
-            fill: "rgba(0,184,255,1)"
+            font: "13px Orbitron",
+            fill: "rgb(165, 187, 255)"
         });
+        laserAmmoText.setShadow(3, 3, "rgba(0,0,0,0.75)", 5);
         laserAmmoText.anchor.setTo(0, 0.5);
         laserAmmoText.fixedToCamera = true;
         flameThrowerAmmoText = game.add.text(gameWidth * 0.02, gameHeight * 0.20, "Flamethrower: " + player.flamethrowerAmmo, {
-            font: "14px Coda",
-            fill: "rgba(0,184,255,1)"
+            font: "13px Orbitron",
+            fill: "rgb(165, 187, 255)"
         });
+        flameThrowerAmmoText.setShadow(3, 3, "rgba(0,0,0,0.75)", 5);
         flameThrowerAmmoText.anchor.setTo(0, 0.5);
         flameThrowerAmmoText.fixedToCamera = true;
         rocketAmmoText = game.add.text(gameWidth * 0.02, gameHeight * 0.25, "Rockets: " + player.rocketAmmo, {
-            font: "14px Coda",
-            fill: "rgba(0,184,255,1)"
+            font: "13px Orbitron",
+            fill: "rgb(165, 187, 255)"
         });
+        rocketAmmoText.setShadow(3, 3, "rgba(0,0,0,0.75)", 5);
         rocketAmmoText.anchor.setTo(0, 0.5);
         rocketAmmoText.fixedToCamera = true;
     },
     addMenuOption: function(text, x, y, callback) {
         var optionStyle = {
-            font: "18px Coda",
-            fill: "rgba(0,184,255,1)"
+            font: "16px Orbitron",
+            fill: "rgb(165, 187, 255)"
         };
         var txt = game.add.text(x, y, text, optionStyle);
         txt.anchor.setTo(1, 0.5);
-        txt.setShadow(3, 3, "rgba(0,0,0,0.5)", 5);
+        txt.setShadow(3, 3, "rgba(0,0,0,0.75)", 5);
         txt.fixedToCamera = true;
         var onOver = function(target) {
-            target.fill = "rgba(100,100,220,1)";
+            target.fill = "rgb(99,93,140)";
             txt.useHandCursor = true;
         };
         var onOut = function(target) {
-            target.fill = "rgba(0,184,255,1)";
+            target.fill = "rgb(165, 187, 255)";
             txt.useHandCursor = false;
         };
         txt.inputEnabled = true;
@@ -267,38 +286,51 @@ Play.prototype = {
     addEnemyWalker: function(x, y) {
         var temp = new EnemyWalker(game, x, y);
         game.add.existing(temp);
-        this.enemies.add(temp);
+        this.normalEnemies.add(temp);
     },
     addEnemyNanobot: function(x, y) {
         var temp = new EnemyNanobot(game, x, y);
         game.add.existing(temp);
-        this.enemies.add(temp);
+        this.normalEnemies.add(temp);
     },
     addEnemySpiderbot: function(x, y) {
         var temp = new EnemySpiderbot(game, x, y);
         game.add.existing(temp);
-        this.enemies.add(temp);
+        this.normalEnemies.add(temp);
     },
     addEnemyTurret: function(x, y) {
         var temp = new EnemyTurret(game, x, y);
         game.add.existing(temp);
-        this.enemies.add(temp);
+        this.normalEnemies.add(temp);
+    },
+    addEnemyMutantShocker: function(x, y) {
+        var temp = new EnemyMutantShocker(game, x, y);
+        game.add.existing(temp);
+        this.ghostEnemies.add(temp);
     },
     addItemMoney: function(x, y) {
         var temp = new ItemMoney(game, x, y);
         game.add.existing(temp);
         this.items.add(temp);
     },
+    addItemShield: function(x, y) {
+        var temp = new ItemShield(game, x, y);
+        game.add.existing(temp);
+        this.itemsShield.add(temp);
+    },
     addObjectLadder: function(x, y) {
         var temp = new ObjectLadder(game, x, y);
         game.add.existing(temp);
         this.ladders.add(temp);
     },
+    addPowerupShield: function() {
+        var temp = new PowerupShield(game);
+        game.add.existing(temp);
+    },
     update: function() {
         this.updatePlayer();
         this.updateEnemies();
         game.physics.arcade.collide(this.weapons[this.currentWeapon], this.collisionLayer, this.killSprite, null, this);
-
     },
     updatePlayer: function() {
         game.physics.arcade.collide(player, this.collisionLayer);
@@ -306,19 +338,27 @@ Play.prototype = {
         player.body.velocity.x = 0;
         this.playerControls();
 
+        game.physics.arcade.overlap(player, this.itemsShield, this.addPowerupShield, null, this);
+
+        if (player.shieldTimer <= 349) {
+            player.shieldTimer += 1;
+            return;
+        }
 
         if (player.healthGracePeriod <= 99) {
             player.healthGracePeriod += 1;
-            return;
         } else {
-            game.physics.arcade.overlap(player, this.enemies, this.hurtPlayer, null, this);
+            game.physics.arcade.overlap(player, this.normalEnemies, this.hurtPlayer, null, this);
+            game.physics.arcade.overlap(player, this.ghostEnemies, this.hurtPlayer, null, this);
         }
 
     },
     updateEnemies: function() {
-        game.physics.arcade.collide(this.enemies, this.collisionLayer);
-        game.physics.arcade.collide(this.enemies, this.enemies);
-        game.physics.arcade.overlap(this.enemies, this.weapons[this.currentWeapon], this.hurtEnemy, null, this);
+        game.physics.arcade.collide(this.normalEnemies, this.collisionLayer);
+        game.physics.arcade.collide(this.normalEnemies, this.normalEnemies);
+        game.physics.arcade.collide(this.ghostEnemies, this.ghostEnemies);
+        game.physics.arcade.overlap(this.normalEnemies, this.weapons[this.currentWeapon], this.hurtEnemy, null, this);
+        game.physics.arcade.overlap(this.ghostEnemies, this.weapons[this.currentWeapon], this.hurtEnemy, null, this);
     },
     playerControls: function() {
         player.isStanding = player.body.blocked.down || player.body.touching.down || this.locked;
@@ -418,6 +458,7 @@ Play.prototype = {
         if (player.health >= 0) {
             return;
         }
+        healthText.text = "Health: X";
         player.kill();
         setTimeout(function() {
             game.world.setBounds(0, 0, gameWidth, gameHeight);
@@ -430,15 +471,17 @@ Play.prototype = {
     },
     debugGame: function() {
         game.debug.body(player);
-        this.enemies.forEachAlive(this.renderGroup, this);
+        this.normalEnemies.forEachAlive(this.renderGroup, this);
+        this.ghostEnemies.forEachAlive(this.renderGroup, this);
         this.ladders.forEachAlive(this.renderGroup, this);
         this.platforms.forEachAlive(this.renderGroup, this);
         this.items.forEachAlive(this.renderGroup, this);
+        this.itemsShield.forEachAlive(this.renderGroup, this);
         this.collisionLayer.debug = true;
     },
     render: function() {
-        // Uncomment to enter debug mode
-        // this.debugGame();
+        // ******* UNCOMMENT TO ENTER DEBUG MODE *******
+        this.debugGame();
     },
     preRender: function() {
         if (game.paused) {
@@ -455,10 +498,10 @@ Play.prototype = {
         if (this.willJump) {
             this.willJump = false;
             if (this.lockedTo && this.lockedTo.deltaY < 0 && this.wasLocked) {
-                //  If the platform is moving up we add its velocity to the players jump
-                player.body.velocity.y = -500 + (this.lockedTo.deltaY * 10);
+                //  If platform is moving up, add its velocity to the players jump
+                player.body.velocity.y = -player.jumpSpeed + (this.lockedTo.deltaY * 10);
             } else {
-                player.body.velocity.y = -500;
+                player.body.velocity.y = -player.jumpSpeed;
             }
         }
         if (this.wasLocked) {
@@ -514,10 +557,10 @@ Play.prototype = {
 //==============================================================================
 // Enemy Walkers
 EnemyWalker = function(game, x, y) {
-    x *= 32;
-    y *= 32;
-    this.health = 25;
-    this.scoreValue = 2500;
+    x *= 16;
+    y *= 16;
+    this.health = 100;
+    this.scoreValue = this.health * 100;
     Phaser.Sprite.call(this, game, x, y, "walker");
     game.physics.enable(this, Phaser.Physics.ARCADE);
     this.enableBody = true;
@@ -528,6 +571,8 @@ EnemyWalker = function(game, x, y) {
     this.animations.add("walk-right", [15, 14, 13, 12, 11, 10, 9, 8], 8, true);
     this.animations.add("shoot-left", [16, 17, 18], 1, true);
     this.animations.add("shoot-right", [21, 20, 19], 1, true);
+    this.sfxWalkerVoice = game.add.audio("sfx-walker-voice");
+    this.playedSFXWalkerVoice = false;
     this.body.bounce.y = 0;
     this.body.bounce.x = 1;
     this.body.collideWorldBounds = true;
@@ -536,6 +581,13 @@ EnemyWalker = function(game, x, y) {
 EnemyWalker.prototype = Object.create(Phaser.Sprite.prototype);
 EnemyWalker.prototype.constructor = EnemyWalker;
 EnemyWalker.prototype.update = function() {
+    if (Math.abs(player.body.position.x - this.body.position.x) < 350 && Math.abs(player.body.position.y - this.body.position.y) < 350) {
+        if (!this.playedSFXWalkerVoice) {
+            this.sfxWalkerVoice.play();
+            this.playedSFXWalkerVoice = true;
+        }
+
+    }
     if (this.body.velocity.x < 60 && this.body.velocity.x > 0) {
         this.body.velocity.x = -60;
     } else if (this.body.velocity.x < 0 && this.body.velocity.x > -60) {
@@ -554,10 +606,10 @@ EnemyWalker.prototype.update = function() {
 };
 // Enemy Nanobots
 EnemyNanobot = function(game, x, y) {
-    x *= 32;
-    y *= 32;
+    x *= 16;
+    y *= 16;
     this.health = 3;
-    this.scoreValue = 300;
+    this.scoreValue = this.health * 100;
     this.nanobotJumpTimer = 0;
     Phaser.Sprite.call(this, game, x, y, "nanobot");
     game.physics.enable(this, Phaser.Physics.ARCADE);
@@ -602,10 +654,10 @@ EnemyNanobot.prototype.update = function() {
 };
 // Enemy Spiderbot
 EnemySpiderbot = function(game, x, y) {
-    x *= 32;
-    y *= 32;
+    x *= 16;
+    y *= 16;
     this.health = 5;
-    this.scoreValue = 500;
+    this.scoreValue = this.health * 100;
     Phaser.Sprite.call(this, game, x, y, "spiderbot");
     game.physics.enable(this, Phaser.Physics.ARCADE);
     this.anchor.set(0.5, 0.5);
@@ -620,7 +672,6 @@ EnemySpiderbot = function(game, x, y) {
 EnemySpiderbot.prototype = Object.create(Phaser.Sprite.prototype);
 EnemySpiderbot.prototype.constructor = EnemySpiderbot;
 EnemySpiderbot.prototype.update = function() {
-    this.chaseTimer -= 1;
     if (Math.abs(player.body.position.x - this.body.position.x) < 250 && Math.abs(player.body.position.y - this.body.position.y) < 250) {
         this.rotation = game.physics.arcade.angleToXY(this, player.body.position.x, player.body.position.y);
         if (playSound) {
@@ -628,7 +679,6 @@ EnemySpiderbot.prototype.update = function() {
         }
         game.physics.arcade.moveToXY(this, player.body.position.x, player.body.position.y, 100);
         this.animations.play("walk");
-        this.chaseTimer = 50;
     } else {
         this.body.velocity.x = 0;
         this.body.velocity.y = 0;
@@ -642,10 +692,10 @@ EnemySpiderbot.prototype.update = function() {
 };
 // Enemy Turrets
 EnemyTurret = function(game, x, y) {
-    x *= 32;
-    y *= 32;
+    x *= 16;
+    y *= 16;
     this.health = 3;
-    this.scoreValue = 300;
+    this.scoreValue = this.health * 100;
     this.isOn = true;
     this.fireRate = 2000;
     this.NextFire = 0;
@@ -676,15 +726,61 @@ EnemyTurret.prototype.update = function() {
         scoreText.text = "Score: " + score;
     }
 };
+// Enemy Spiderbot
+EnemyMutantShocker = function(game, x, y) {
+    x *= 16;
+    y *= 16;
+    this.health = 100;
+    this.scoreValue = this.health * 100;
+    Phaser.Sprite.call(this, game, x, y, "mutantshocker");
+    game.physics.enable(this, Phaser.Physics.ARCADE);
+    this.anchor.set(0.5, 0.5);
+    this.enableBody = true;
+    this.animations.add("chase", [0, 1, 2, 3, 4, 5, 6, 7], 11, true);
+    this.animations.add("idle", [8, 9, 10, 11], 11, true);
+    this.sfxMutantShockerVoice = game.add.audio("sfx-mutant-shocker-voice");
+    this.sfxMutantShockerShock = game.add.audio("sfx-mutant-shocker-shock");
+    this.playedSFXMutantShockerVoice = false;
+    this.body.setCircle(80, 48, 48);
+    this.body.collideWorldBounds = true;
+    this.body.allowGravity = false;
+};
+EnemyMutantShocker.prototype = Object.create(Phaser.Sprite.prototype);
+EnemyMutantShocker.prototype.constructor = EnemyMutantShocker;
+EnemyMutantShocker.prototype.update = function() {
+    if (Math.abs(player.body.position.x - this.body.position.x) < 350 && Math.abs(player.body.position.y - this.body.position.y) < 350) {
+        this.rotation = game.physics.arcade.angleToXY(this, player.body.position.x, player.body.position.y);
+        if (playSound) {
+            if (!this.playedSFXMutantShocker) {
+                this.sfxMutantShockerVoice.play();
+                this.playedSFXMutantShocker = true;
+            } else {
+                this.sfxMutantShockerShock.play();
+            }
+        }
+        game.physics.arcade.moveToXY(this, player.body.position.x, player.body.position.y, 100);
+        this.animations.play("chase");
+    } else {
+        this.animations.play("idle");
+        this.body.velocity.x = 0;
+        this.body.velocity.y = 0;
+        this.frame = 0;
+    }
+    if (this.health <= 0) {
+        this.destroy();
+        score += this.scoreValue;
+        scoreText.text = "Score: " + score;
+    }
+};
 //==============================================================================
 // Item classes
 //==============================================================================
 // Item Money
 ItemMoney = function(game, x, y) {
-    x *= 32;
-    y *= 32;
-    this.scoreValue = 150;
-    Phaser.Sprite.call(this, game, x, y, "money");
+    x *= 16;
+    y *= 16;
+    this.scoreValue = 50;
+    Phaser.Sprite.call(this, game, x, y, "money-item");
     game.physics.enable(this, Phaser.Physics.ARCADE);
     this.enableBody = true;
     this.body.setSize(16, 16, 8, 8);
@@ -700,8 +796,36 @@ ItemMoney.prototype.update = function() {
     var pickedUp = game.physics.arcade.overlap(player, this, null, null, this);
     if (pickedUp) {
         this.kill();
+        this.destroy();
         if (playSound) {
             this.sfxMoney.play();
+        }
+        score += this.scoreValue;
+        scoreText.text = "Score: " + score;
+    }
+};
+// Item Shield
+ItemShield = function(game, x, y) {
+    x *= 16;
+    y *= 16;
+    this.scoreValue = 100;
+    Phaser.Sprite.call(this, game, x, y, "shield-item");
+    game.physics.enable(this, Phaser.Physics.ARCADE);
+    this.enableBody = true;
+    this.body.setSize(16, 16, 8, 8);
+    this.sfxPowerUp = game.add.audio("sfx-power-up");
+    this.body.immovable = true;
+    this.body.allowGravity = false;
+};
+ItemShield.prototype = Object.create(Phaser.Sprite.prototype);
+ItemShield.prototype.constructor = ItemShield;
+ItemShield.prototype.update = function() {
+    var pickedUp = game.physics.arcade.overlap(player, this, null, null, this);
+    if (pickedUp) {
+        this.kill();
+        this.destroy();
+        if (playSound) {
+            this.sfxPowerUp.play();
         }
         score += this.scoreValue;
         scoreText.text = "Score: " + score;
@@ -712,8 +836,8 @@ ItemMoney.prototype.update = function() {
 //==============================================================================
 // Object Ladders
 ObjectLadder = function(game, x, y) {
-    x *= 32;
-    y *= 32;
+    x *= 16;
+    y *= 16;
     this.climbMode = false;
     Phaser.Sprite.call(this, game, x, y, "ladder-m");
     game.physics.enable(this, Phaser.Physics.ARCADE);
@@ -750,7 +874,9 @@ ObjectLadder.prototype.update = function() {
     }
 };
 // Moving Platforms — thanks to Richard Davey from Phaser.io for this code!
-MovingPlatform = function(game, x, y, key, group) {
+ObjectPlatform = function(game, x, y, key, group) {
+    x *= 16;
+    y *= 16;
     if (typeof group === "undefined") {
         group = game.world;
     }
@@ -766,9 +892,9 @@ MovingPlatform = function(game, x, y, key, group) {
     this.playerLocked = false;
     group.add(this);
 };
-MovingPlatform.prototype = Object.create(Phaser.Sprite.prototype);
-MovingPlatform.prototype.constructor = MovingPlatform;
-MovingPlatform.prototype.addMotionPath = function(motionPath) {
+ObjectPlatform.prototype = Object.create(Phaser.Sprite.prototype);
+ObjectPlatform.prototype.constructor = ObjectPlatform;
+ObjectPlatform.prototype.addMotionPath = function(motionPath) {
     this.tweenX = game.add.tween(this.body);
     this.tweenY = game.add.tween(this.body);
     //  motionPath is an array containing objects with this structure
@@ -786,18 +912,18 @@ MovingPlatform.prototype.addMotionPath = function(motionPath) {
     this.tweenX.loop();
     this.tweenY.loop();
 };
-MovingPlatform.prototype.start = function() {
+ObjectPlatform.prototype.start = function() {
     this.tweenX.start();
     this.tweenY.start();
 };
-MovingPlatform.prototype.stop = function() {
+ObjectPlatform.prototype.stop = function() {
     this.tweenX.stop();
     this.tweenY.stop();
 };
 //==============================================================================
 // Weapon classes
 //==============================================================================
-var Bullet = function(game, key) {
+var Projectile = function(game, key) {
     Phaser.Sprite.call(this, game, 0, 0, key);
     this.texture.baseTexture.scaleMode = PIXI.scaleModes.NEAREST;
     this.anchor.set(0.5, 0.5);
@@ -807,9 +933,9 @@ var Bullet = function(game, key) {
     this.tracking = false;
     this.scaleSpeed = 0;
 };
-Bullet.prototype = Object.create(Phaser.Sprite.prototype);
-Bullet.prototype.constructor = Bullet;
-Bullet.prototype.fire = function(x, y, angle, speed, gx, gy) {
+Projectile.prototype = Object.create(Phaser.Sprite.prototype);
+Projectile.prototype.constructor = Projectile;
+Projectile.prototype.fire = function(x, y, angle, speed, gx, gy) {
     gx = gx || 0;
     gy = gy || 0;
     this.reset(x, y);
@@ -818,7 +944,7 @@ Bullet.prototype.fire = function(x, y, angle, speed, gx, gy) {
     this.angle = angle;
     this.body.gravity.set(gx, gy);
 };
-Bullet.prototype.update = function() {
+Projectile.prototype.update = function() {
 
     if (this.tracking) {
         this.rotation = Math.atan2(this.body.velocity.y, this.body.velocity.x);
@@ -829,12 +955,13 @@ Bullet.prototype.update = function() {
     }
 };
 var Weapon = {};
-Weapon.fireAmmo = function(context, x, y, angle, speed, gx, gy, resetFire) {
+Weapon.fireAmmo = function(context, x, y, angle, speed, direction, gx, gy, resetFire) {
     gx = gx || 0;
     gy = gy || 0;
     var ammo = context.getFirstExists(false);
     if (ammo) {
-        ammo.fire(x, y, angle, speed, gx, gy);
+        ammo.fire(x, y, angle, direction * speed, gx, gy);
+        ammo.scale.setTo(direction, 1);
     }
     if (resetFire) {
         context.nextFire = context.game.time.time + context.fireRate;
@@ -844,11 +971,11 @@ Weapon.Pistol = function(game) {
     Phaser.Group.call(this, game, game.world, "Pistol", false, true, Phaser.Physics.ARCADE);
     this.sfxPistol = game.add.audio("sfx-pistol");
     this.nextFire = 0;
-    this.bulletSpeed = 600;
+    this.projectileSpeed = 600;
     this.fireRate = 500;
     this.dir = 1;
     for (var i = 0; i < 64; i++) {
-        this.add(new Bullet(game, "bullet1"), true);
+        this.add(new Projectile(game, "projectile1"), true);
     }
     return this;
 };
@@ -865,7 +992,7 @@ Weapon.Pistol.prototype.fire = function(source) {
     }
     var x = source.x + (this.dir * source.width / 2);
     var y = source.y - (source.height / 2);
-    Weapon.fireAmmo(this, x, y, 0, this.dir * this.bulletSpeed, 0, 0, true);
+    Weapon.fireAmmo(this, x, y, 0, this.projectileSpeed, this.dir, 0, 0, true);
     if (playSound) {
         this.sfxPistol.play();
     }
@@ -874,11 +1001,11 @@ Weapon.Rifle = function(game) {
     Phaser.Group.call(this, game, game.world, "Rifle", false, true, Phaser.Physics.ARCADE);
     this.sfxRifle = game.add.audio("sfx-rifle");
     this.nextFire = 0;
-    this.bulletSpeed = 600;
+    this.projectileSpeed = 600;
     this.fireRate = 40;
     this.dir = 1;
     for (var i = 0; i < 32; i++) {
-        this.add(new Bullet(game, "bullet2"), true);
+        this.add(new Projectile(game, "projectile2"), true);
     }
     return this;
 };
@@ -896,7 +1023,7 @@ Weapon.Rifle.prototype.fire = function(source) {
     }
     var x = source.x + (this.dir * source.width / 2);
     var y = source.y - (source.height / 2) + this.game.rnd.between(-7, 7);
-    Weapon.fireAmmo(this, x, y, 0, this.dir * this.bulletSpeed, 0, 0, true);
+    Weapon.fireAmmo(this, x, y, 0, this.projectileSpeed, this.dir, 0, 0, true);
     player.rifleAmmo -= 1;
     rifleAmmoText.text = "Rifle: " + player.rifleAmmo;
     if (playSound) {
@@ -907,11 +1034,11 @@ Weapon.Laser = function(game) {
     Phaser.Group.call(this, game, game.world, "Laser", false, true, Phaser.Physics.ARCADE);
     this.sfxLaser = game.add.audio("sfx-laser");
     this.nextFire = 0;
-    this.bulletSpeed = 1000;
+    this.projectileSpeed = 1000;
     this.fireRate = 45;
     this.dir = 1;
     for (var i = 0; i < 64; i++) {
-        this.add(new Bullet(game, "bullet3"), true);
+        this.add(new Projectile(game, "projectile3"), true);
     }
     return this;
 };
@@ -928,7 +1055,7 @@ Weapon.Laser.prototype.fire = function(source) {
     }
     var x = source.x + (this.dir * source.width / 2);
     var y = source.y - (source.height / 2);
-    Weapon.fireAmmo(this, x, y, 0, this.dir * this.bulletSpeed, 0, 0, true);
+    Weapon.fireAmmo(this, x, y, 0, this.projectileSpeed, this.dir, 0, 0, true);
     player.laserAmmo -= 1;
     laserAmmoText.text = "Laser: " + player.laserAmmo;
     if (playSound) {
@@ -939,14 +1066,14 @@ Weapon.Flamethrower = function(game) {
     Phaser.Group.call(this, game, game.world, "Flamethrower", false, true, Phaser.Physics.ARCADE);
     this.sfxFlamethrower = game.add.audio("sfx-flamethrower");
     this.nextFire = 0;
-    this.bulletSpeed = 600;
+    this.projectileSpeed = 500;
     this.fireRate = 40;
     this.dir = 1;
     this.Flamethrower = Phaser.ArrayUtils.numberArrayStep(-800, 800, 200);
     this.Flamethrower = this.Flamethrower.concat(Phaser.ArrayUtils.numberArrayStep(800, -800, -200));
     this.flamethrowerIndex = 0;
     for (var i = 0; i < 64; i++) {
-        this.add(new Bullet(game, "bullet4"), true);
+        this.add(new Projectile(game, "projectile4"), true);
     }
     return this;
 };
@@ -964,7 +1091,7 @@ Weapon.Flamethrower.prototype.fire = function(source) {
     var x = source.x + (this.dir * source.width / 2);
     var y = source.y - (source.height / 2);
     var index = this.Flamethrower[this.flamethrowerIndex];
-    Weapon.fireAmmo(this, x, y, 0, this.dir * this.bulletSpeed, 0, index, true);
+    Weapon.fireAmmo(this, x, y, 0, this.projectileSpeed, this.dir, 0, index, true);
     player.flamethrowerAmmo -= 1;
     flameThrowerAmmoText.text = "Flamethrower: " + player.flamethrowerAmmo;
     this.flamethrowerIndex++;
@@ -979,11 +1106,11 @@ Weapon.Rockets = function(game) {
     Phaser.Group.call(this, game, game.world, "Rockets", false, true, Phaser.Physics.ARCADE);
     this.sfxRocket = game.add.audio("sfx-rocket");
     this.nextFire = 0;
-    this.bulletSpeed = 400;
+    this.projectileSpeed = 300;
     this.fireRate = 800;
     this.dir = 1;
     for (var i = 0; i < 32; i++) {
-        this.add(new Bullet(game, "bullet5"), true);
+        this.add(new Projectile(game, "projectile5"), true);
     }
     this.setAll("tracking", true);
     return this;
@@ -1001,11 +1128,52 @@ Weapon.Rockets.prototype.fire = function(source) {
     }
     var x = source.x + (this.dir * source.width / 2);
     var y = source.y - (source.height / 2);
-    Weapon.fireAmmo(this, x, y, 0, this.dir * this.bulletSpeed, 0, -700, true);
-    Weapon.fireAmmo(this, x, y, 0, this.dir * this.bulletSpeed, 0, 700);
-    player.rocketAmmo -= 2;
+    // Tween doesn't require this.dir scale flip, simply set to 1
+    Weapon.fireAmmo(this, x, y, 0, this.dir * this.projectileSpeed, 1, 0, -800, true);
+    player.rocketAmmo -= 1;
     rocketAmmoText.text = "Rockets: " + player.rocketAmmo;
     if (playSound) {
         this.sfxRocket.play();
     }
+};
+Weapon.ShotGun = function (game) {
+    Phaser.Group.call(this, game, game.world, 'Split Shot', false, true, Phaser.Physics.ARCADE);
+    this.nextFire = 0;
+    this.bulletSpeed = 700;
+    this.fireRate = 40;
+    for (var i = 0; i < 64; i++)
+    {
+        this.add(new Bullet(game, 'bullet8'), true);
+    }
+    return this;
+};
+
+//==============================================================================
+// Powerup classes
+//==============================================================================
+
+// Powerup Shield
+PowerupShield = function(game) {
+    Phaser.Sprite.call(this, game, player.body.position.x + (player.body.width / 2), player.body.position.y + (player.body.height / 2), "shield-powerup");
+    this.anchor.setTo(0.5, 0.5);
+    // this.animations.add("pulsate", [0, 1, 2, 3], 2, true);
+    this.sfxPowerDown = game.add.audio("sfx-power-down");
+    player.shieldTimer = 0;
+};
+PowerupShield.prototype = Object.create(Phaser.Sprite.prototype);
+PowerupShield.prototype.constructor = PowerupShield;
+PowerupShield.prototype.update = function() {
+
+    this.position.x = player.body.position.x + (player.body.width / 2);
+    this.position.y = player.body.position.y + (player.body.height / 2);
+    this.angle += 5;
+
+    if (player.shieldTimer >= 350) {
+        if (playSound) {
+            this.sfxPowerDown.play();
+        }
+        this.kill();
+        this.destroy();
+    }
+
 };

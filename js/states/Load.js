@@ -7,8 +7,8 @@
 var music;
 var sound;
 var playMusic = false;
-var playSound = false;
-var fullScreen = true;
+var playSound = true;
+var scaleGame = true;
 
 var Load = function () {}
 
@@ -32,12 +32,16 @@ Load.prototype = {
         game.load.audio("advanced-simulacra", ["audio/music/advanced-simulacra.ogg", "audio/music/advanced-simulacra.wav"]);
         game.load.audio("by-product", ["audio/music/by-product.ogg", "audio/music/by-product.wav"]);
         game.load.audio("intro", ["audio/music/intro.ogg", "audio/music/intro.wav"]);
+        game.load.audio("win", ["audio/music/win.ogg", "audio/music/win.wav"]);
 
         // Sound effects
         game.load.audio("sfx-menu-forward", ["audio/sfx/itempick.ogg", "audio/sfx/itempick.wav"]);
         game.load.audio("sfx-menu-back", ["audio/sfx/itemback.ogg", "audio/sfx/itemback.wav"]);
+        game.load.audio("sfx-walker-voice", ["audio/sfx/walkervoice.ogg", "audio/sfx/walkervoice.wav"]);
         game.load.audio("sfx-nanobot-jump", ["audio/sfx/nanobot.ogg", "audio/sfx/nanobot.wav"]);
         game.load.audio("sfx-spiderbot", ["audio/sfx/spiderbot.ogg", "audio/sfx/spiderbot.wav"]);
+        game.load.audio("sfx-mutant-shocker-voice", ["audio/sfx/mutantshockervoice.ogg", "audio/sfx/mutantshockervoice.wav"]);
+        game.load.audio("sfx-mutant-shocker-shock", ["audio/sfx/mutantshockershock.ogg", "audio/sfx/mutantshockershock.wav"]);
         game.load.audio("sfx-money", ["audio/sfx/coin.ogg", "audio/sfx/coin.wav"]);
         game.load.audio("sfx-pistol", ["audio/sfx/weapon-pistol.ogg", "audio/sfx/weapon-pistol.wav"]);
         game.load.audio("sfx-rifle", ["audio/sfx/weapon-rifle.ogg", "audio/sfx/weapon-rifle.wav"]);
@@ -45,7 +49,8 @@ Load.prototype = {
         game.load.audio("sfx-flamethrower", ["audio/sfx/weapon-flamethrower.ogg", "audio/sfx/weapon-flamethrower.wav"]);
         game.load.audio("sfx-rocket", ["audio/sfx/weapon-rocket.ogg", "audio/sfx/weapon-rocket.wav"]);
         game.load.audio("sfx-out-of-ammo", ["audio/sfx/weapon-outofammo.ogg", "audio/sfx/weapon-outofammo.wav"]);
-
+        game.load.audio("sfx-power-up", ["audio/sfx/powerup.ogg", "audio/sfx/powerup.wav"]);
+        game.load.audio("sfx-power-down", ["audio/sfx/powerdown.ogg", "audio/sfx/powerdown.wav"]);
 
     },
 
@@ -54,7 +59,6 @@ Load.prototype = {
         // General and interface (ui)
         game.load.image("menu-bg", "img/ui/menu-bg.png");
         game.load.image("intro-bg", "img/ui/intro-bg.png");
-        game.load.image("gameover-bg", "img/ui/gameover-bg.png");
 
         // Levels
         game.load.image("tileset1", "img/levels/tileset1.png");
@@ -64,13 +68,17 @@ Load.prototype = {
         game.load.image("platform", "img/objs/platform.png");
 
         // Items
-        game.load.spritesheet("money", "img/items/money.png", 32, 32, 7);
+        game.load.spritesheet("money-item", "img/items/money.png", 32, 32, 7);
+        game.load.image("shield-item", "img/items/shield.png");
 
-        // Bullets
+        // Projectiles
         for (var i = 1; i <= 5; i++)
         {
-            this.load.image('bullet' + i, 'img/bullets/bullet' + i + '.png');
+            game.load.image("projectile" + i, "img/projectiles/projectile" + i + ".png");
         }
+
+        // Powerups
+        game.load.image("shield-powerup", "img/powerups/shield.png")
 
         // Characters (chars)
         game.load.spritesheet("zed", "img/chars/small-zed.png", 48, 48, 48);
@@ -78,6 +86,7 @@ Load.prototype = {
         game.load.spritesheet("nanobot", "img/chars/nanobot.png", 32, 32, 36);
         game.load.spritesheet("spiderbot", "img/chars/spiderbot.png", 64, 64, 10);
         game.load.spritesheet("turret", "img/chars/turret.png", 62, 46, 5);
+        game.load.spritesheet("mutantshocker", "img/chars/mutantshocker.png", 256, 256, 12);
 
     },
 
@@ -96,10 +105,12 @@ Load.prototype = {
         this.logo.anchor.setTo(0.5);
 
         this.status = game.make.text(gameWidth * 0.5, gameHeight * 0.5, "Loading game assets...", {
-            fill: "white",
-            font: "48px Coda"
+            fill: "rgb(165, 187, 255)",
+            font: "36px Orbitron"
         });
         this.status.anchor.setTo(0.5);
+        this.status.setShadow(3, 3, "rgba(0,0,0,0.75)", 5);
+
 
         // Loads bar from right to left
         this.loadingBar = game.make.sprite((gameWidth * 0.5) - (387 / 2), gameHeight*0.6, "loading");
@@ -149,6 +160,7 @@ Load.prototype = {
 
         // No blur upon scaling
         game.renderer.renderSession.roundPixels = true;
+        Phaser.Canvas.setImageRenderingCrisp(this.game.canvas);
 
         // Game physics (Phaser ARCADE)
         game.physics.startSystem(Phaser.Physics.ARCADE);

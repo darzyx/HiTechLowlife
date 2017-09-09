@@ -3,6 +3,7 @@
  * HiTech Lowlife Demo Code
  * Copyright © 2017 Jose Dario Sanchez
  */
+
 var Credits = function() {};
 Credits.prototype = {
     preload: function() {
@@ -10,17 +11,22 @@ Credits.prototype = {
     },
     addCredit: function(task, author) {
         var authorStyle = {
-            font: "64px Orbitron",
+            font: "36px Orbitron",
             fill: "white",
         };
         var taskStyle = {
-            font: "48px Coda",
+            font: "32px Orbitron",
             fill: "white",
         };
         var authorText = game.add.text(game.world.centerX, gameHeight + 100, author, authorStyle);
         var taskText = game.add.text(game.world.centerX, gameHeight + 150, task, taskStyle);
+
         authorText.anchor.setTo(0.5, 0.5);
+        authorText.setShadow(3, 3, "rgba(0,0,0,0.75)", 5);
+
         taskText.anchor.setTo(0.5, 0.5);
+        taskText.setShadow(3, 3, "rgba(0,0,0,0.75)", 5);
+
         game.add.tween(authorText).to({
             y: -300
         }, 10000, Phaser.Easing.Cubic.Out, true, this.creditCount * 3000);
@@ -31,9 +37,10 @@ Credits.prototype = {
     },
     create: function() {
         this.stage.disableVisibilityChange = true;
-        if (playMusic) {
+        if (music.name !== "win" && playMusic) {
             music.stop();
-            music = game.add.audio("by-product");
+            music = game.add.audio("win");
+            music.loop = true;
             music.play();
         }
         var bg = game.add.sprite(0, 0, "menu-bg");
@@ -42,7 +49,7 @@ Credits.prototype = {
         this.addCredit("Music", "Maxstack");
         this.addCredit("Zed Sprite", "irmirx");
         this.addCredit("Walker Sprite", "NICKtendo DS");
-        this.addCredit("Spiderbot Sprite", "Stephen \"Redshrike\" Challener");
+        this.addCredit("Spiderbot Sprite", "Stephen \"Redshrike\"");
         this.addCredit("Nanobot Sprite", "GrafxKid");
         this.addCredit("Inventory Items Sprites", "OceansDream");
         this.addCredit("Sound Effects", "Little Robot Sound Factory");
@@ -64,18 +71,18 @@ Credits.prototype = {
     },
     addMenuOption: function(text, x, y, callback) {
         var txt = game.add.text(x, y, text, {
-            font: "48px Coda",
-            fill: "rgba(0,184,255,1)"
+            font: "36px Orbitron",
+            fill: "rgb(165, 187, 255)"
         });
         txt.anchor.setTo(0.5, 0.5);
-        txt.setShadow(3, 3, "rgba(0,0,0,0.5)", 5);
+        txt.setShadow(3, 3, "rgba(0,0,0,0.75)", 5);
 
         var onOver = function(target) {
-            target.fill = "rgba(100,100,220,1)";
+            target.fill = "rgb(99,93,140)";
             txt.useHandCursor = true;
         };
         var onOut = function(target) {
-            target.fill = "rgba(0,184,255,1)";
+            target.fill = "rgb(165, 187, 255)";
             txt.useHandCursor = false;
         };
         txt.inputEnabled = true;

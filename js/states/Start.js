@@ -4,8 +4,8 @@
  * Copyright © 2017 Jose Dario Sanchez
 */
 
-var gameWidth = 768;
-var gameHeight = 432;
+var gameWidth = 640;
+var gameHeight = 360;
 var game = new Phaser.Game(gameWidth, gameHeight, Phaser.CANVAS, "HiTech Lowlife");
 
 Start = function () {};
@@ -15,7 +15,7 @@ Start.prototype = {
     preload: function () {
 
         // Loading screen elements
-        game.load.image("load-bg", "img/ui/load-bg.png");
+        game.load.image("load-bg", "img/ui/intro-bg.png");
         game.load.image("loading", "img/ui/loading.png");
         game.load.image("brand", "img/ui/logo-darzyx.png");
 
@@ -31,7 +31,7 @@ Start.prototype = {
         // Google WebFont
         WebFont.load({
           google: {
-            families: ["Aldrich", "Audiowide", "Coda", "Orbitron", "VT323"]
+            families: ["Aldrich", "Audiowide", "Share Tech Mono", "Orbitron", "VT323"]
           }
         });
 

@@ -8,17 +8,16 @@ Intro = function() {};
 Intro.prototype = {
     preload: function() {
         this.introTextContent = [
-            "December 1st, 2068",
+            "GAME CONTROLS",
             " ",
-            "You're awake! Can you read this? Good. My name is Dr. Janet Roko. My team and I",
-            "here at the HiTech National Laboratory are in the final stages of developing a",
-            "working artificial general superintelligence (AGSI).",
-            "We predict that the final version of our project will catalyze runaway technological",
-            "growth in the world, so we want to be sure that our software works exactly as.",
-            "intended.",
-            "You are our latest prototype, and we want to see what you can do. Your first mission",
-            "is simply to demonstrate your abilities. There's no time to waste, so let's hit the",
-            "ground running. Are you ready?"];
+            "MOVEMENT: LEFT/RIGHT ARROW KEYS",
+            "JUMP/CLIMB: UP ARROW KEY",
+            "SHOOT: SPACEBAR",
+            "SWITCH WEAPON: ENTER",
+            " ",
+            "Are you ready?"
+
+        ];
         this.line = [];
         this.wordIndex = 0;
         this.lineIndex = 0;
@@ -36,10 +35,10 @@ Intro.prototype = {
         this.createMenuOptions();
 
         introText = game.add.text(64, 32, " ", {
-            font: "18px Coda",
-            fill: "rgba(0,184,255,1)",
+            font: "18px Orbitron",
+            fill: "rgb(165, 187, 255)"
         });
-        introText.setShadow(3, 3, "rgba(0,0,0,0.5)", 5);
+        introText.setShadow(3, 3, "rgba(0,0,0,0.75)", 5);
         this.nextLine();
     },
     createMenuOptions: function() {
@@ -58,19 +57,19 @@ Intro.prototype = {
     },
     addMenuOption: function(text, x, y, callback) {
         var optionStyle = {
-            font: "48px Coda",
-            fill: "rgba(0,184,255,1)"
+            font: "36px Orbitron",
+            fill: "rgb(165, 187, 255)"
         };
         var txt = game.add.text(x, y, text, optionStyle);
         txt.anchor.setTo(0.5, 0.5);
-        txt.setShadow(3, 3, "rgba(0,0,0,0.5)", 5);
+        txt.setShadow(3, 3, "rgba(0,0,0,0.75)", 5);
 
         var onOver = function(target) {
-            target.fill = "rgba(100,100,220,1)";
+            target.fill = "rgb(99,93,140)";
             txt.useHandCursor = true;
         };
         var onOut = function(target) {
-            target.fill = "rgba(0,184,255,1)";
+            target.fill = "rgb(165, 187, 255)";
             txt.useHandCursor = false;
         };
         txt.inputEnabled = true;

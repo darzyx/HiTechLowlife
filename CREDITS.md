@@ -17,15 +17,19 @@ A big thanks to all of the following artists for their contributions:
 * GrafxKid — Nanobot sprite (CC0)
 * OceansDream — Inventory Items Sprites (CC-BY 3.0)
 * Stephen "Redshrike" Challener — Spiderbot sprite (CC-BY 3.0)
-* Little Robot Sound Factory — Sound effects (CC-BY 3.0)
+* Little Robot Sound Factory (www.littlerobotsoundfactory.com) — Sound effects (CC-BY 3.0)
 * Michel Baradari — Weapon/other sound effects (CC-BY 3.0)
 * Bart Kelsey — Spiderbot sound effect (CC-BY 3.0)
 * Brandon Morris — Coin sound effect (CC-BY 3.0)
 * Mutantleg — Weapon sprites (CC-BY 3.0)
 * VSG — Laser special effect (CC-BY-SA 3.0)
 * Prinsu-Kun — Flamethrower special effect (CC-BY-SA 3.0)
-
-
+* Dadsky — Mutant Shocker Enemy sprite (CC0)
+* Vinrax — Mutant Shocker Voice Sound Effect (CC0)
+* qubodup — Mutant Shocker Shock Sound Effect (CC-BY 3.0)
+* PrettyLobster — Walker Voice Sound Effect (CC-BY 3.0)
+* jobromedia — Power-up/down sound effects (CC-BY 3.0)
+* bonsaiheldin — Shield sprite (CC-BY-SA 3.0)
 
 Thanks to LogoMakr.com for their logo maker tool.
 
