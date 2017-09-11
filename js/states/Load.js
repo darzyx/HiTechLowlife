@@ -8,7 +8,7 @@
 
 var music
 var sound
-var playMusic = false
+var playMusic = true
 var playSound = true
 var scaleGame = true
 
