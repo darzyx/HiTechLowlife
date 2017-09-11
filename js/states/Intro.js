@@ -4,9 +4,11 @@
  * Copyright © 2017 Jose Dario Sanchez
  */
 
- /* global game */
+ /* global game, gameWidth, gameHeight, music, playMusic, playSound, sfxMenuForward, sfxMenuBack */
 
-Intro = function () {}
+var introText
+
+var Intro = function () {}
 Intro.prototype = {
   preload: function () {
     this.introTextContent = [

@@ -29,28 +29,40 @@ Menu.prototype = {
     this.createMenu()
   },
   createMenu: function () {
-    this.addMenuOption('Start', gameWidth * 0.5, gameHeight * 0.45, function () {
+    this.addMenuOption('Start', '36px', gameWidth * 0.5, gameHeight * 0.45, function () {
       if (playSound) {
         sfxMenuForward.play()
       }
       this.game.state.start('Intro')
     })
-    this.addMenuOption('Options', gameWidth * 0.5, gameHeight * 0.65, function () {
+    this.addMenuOption('Options', '36px', gameWidth * 0.5, gameHeight * 0.65, function () {
       if (playSound) {
         sfxMenuForward.play()
       }
       this.game.state.start('Options')
     })
-    this.addMenuOption('Credits', gameWidth * 0.5, gameHeight * 0.85, function () {
+    this.addMenuOption('Credits', '36px', gameWidth * 0.5, gameHeight * 0.85, function () {
       if (playSound) {
         sfxMenuForward.play()
       }
       this.game.state.start('Credits')
     })
+    this.addMenuOption('Home', '24px', gameWidth * 0.10, gameHeight * 0.90, function () {
+      if (playSound) {
+        sfxMenuBack.play()
+      }
+      window.location.href = "http://www.darzyx.com/";
+    })
+    this.addMenuOption('GitHub', '24px', gameWidth * 0.90, gameHeight * 0.90, function () {
+      if (playSound) {
+        sfxMenuBack.play()
+      }
+      window.location.href = "https://github.com/josedarioxyz/HiTechLowlife";
+    })
   },
-  addMenuOption: function (text, x, y, callback) {
+  addMenuOption: function (text, fontSize, x, y, callback) {
     var optionStyle = {
-      font: '36px Orbitron',
+      font: fontSize + ' Orbitron',
       fill: 'rgb(165, 187, 255)'
     }
     var txt = game.add.text(x, y, text, optionStyle)

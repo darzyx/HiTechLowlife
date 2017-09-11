@@ -173,7 +173,7 @@ Play.prototype = {
     player.animations.add('shootWalkLeft', [36, 37, 38, 39, 40, 41], 10, true)
     player.animations.add('shootWalkRight', [42, 43, 44, 45, 46, 47], 10, true)
     cursors = game.input.keyboard.createCursorKeys()
-    player.fireButton = game.input.keyboard.addKey(Phaser.Keyboard.S)
+    player.fireButton = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR)
     game.camera.follow(player, Phaser.Camera.FOLLOW_LOCKON)
     player.rifleAmmo = 100
     player.laserAmmo = 100
