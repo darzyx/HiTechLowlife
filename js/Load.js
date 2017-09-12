@@ -18,12 +18,12 @@ Load.prototype = {
 
   loadJS: function () {
         // Game states
-    game.load.script('Menu', 'js/states/Menu.js')
-    game.load.script('Options', 'js/states/Options.js')
-    game.load.script('Credits', 'js/states/Credits.js')
-    game.load.script('Intro', 'js/states/Intro.js')
-    game.load.script('Play', 'js/states/Play.js')
-    game.load.script('GameOver', 'js/states/GameOver.js')
+    game.load.script('Menu', 'js/Menu.js')
+    game.load.script('Options', 'js/Options.js')
+    game.load.script('Credits', 'js/Credits.js')
+    game.load.script('Intro', 'js/Intro.js')
+    game.load.script('Play', 'js/Play.js')
+    game.load.script('GameOver', 'js/GameOver.js')
   },
 
   loadAudio: function () {
@@ -69,12 +69,12 @@ Load.prototype = {
     game.load.image('shield-item', 'img/items/shield.png')
 
         // Projectiles
-    for (var i = 1; i <= 5; i++) {
+    for (var i = 1; i <= 5; i += 1) {
       game.load.image('projectile' + i, 'img/projectiles/projectile' + i + '.png')
     }
 
         // Powerups
-    game.load.image('shield-powerup', 'img/powerups/shield.png')
+    game.load.spritesheet('shield-powerup', 'img/powerups/shield.png', 85, 85, 11)
 
         // Characters (chars)
     game.load.spritesheet('zed', 'img/chars/small-zed.png', 48, 48, 48)

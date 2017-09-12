@@ -12,7 +12,7 @@ A big thanks to all of the following artists for their contributions:
 * jdagenet — Intro drone sound effect (CC-BY 3.0)
 * irmirx — Zed sprite (modified) (CC-BY 3.0)
 * Jerom — Minimal background tubes (CC-BY-SA 3.0)
-* Skorpio — Visual effects Sprites (CC-BY 3.0)
+* Skorpio — Visual effects Sprites, Shield Sprite (CC-BY 3.0)
 * NICKtendo DS — Walker sprite
 * GrafxKid — Nanobot sprite (CC0)
 * OceansDream — Inventory Items Sprites (CC-BY 3.0)
@@ -29,7 +29,6 @@ A big thanks to all of the following artists for their contributions:
 * qubodup — Mutant Shocker Shock Sound Effect (CC-BY 3.0)
 * PrettyLobster — Walker Voice Sound Effect (CC-BY 3.0)
 * jobromedia — Power-up/down sound effects (CC-BY 3.0)
-* bonsaiheldin — Shield sprite (CC-BY-SA 3.0)
 
 Thanks to LogoMakr.com for their logo maker tool.
 

@@ -19,7 +19,7 @@ Start.prototype = {
     game.load.image('load-bg', 'img/ui/intro-bg.png')
     game.load.image('loading', 'img/ui/loading.png')
 
-    game.load.script('Load', 'js/states/Load.js')
+    game.load.script('Load', 'js/Load.js')
 
         // Google WebFont
     game.load.script('WebFont', '//ajax.googleapis.com/ajax/libs/webfont/1.4.7/webfont.js')

@@ -1114,10 +1114,11 @@ Weapon.Rockets.prototype.fire = function (source) {
 var PowerupShield = function (game) {
   Phaser.Sprite.call(this, game, player.body.position.x + (player.body.width / 2), player.body.position.y + (player.body.height / 2), 'shield-powerup')
   this.anchor.setTo(0.5, 0.5)
-    // this.animations.add("pulsate", [0, 1, 2, 3], 2, true);
+  this.animations.add('waves', [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], 5, true)
   this.sfxPowerDown = game.add.audio('sfx-power-down')
   player.shieldTimer = 0
   healthText.addColor('rgb(0, 255, 200)', 0)
+  this.animations.play('waves')
 }
 PowerupShield.prototype = Object.create(Phaser.Sprite.prototype)
 PowerupShield.prototype.constructor = PowerupShield
@@ -1126,7 +1127,6 @@ PowerupShield.prototype.update = function () {
   healthText.text = temp.toString() + '%'
   this.position.x = player.body.position.x + (player.body.width / 2)
   this.position.y = player.body.position.y + (player.body.height / 2)
-  this.angle += 5
   if (player.shieldTimer >= 350) {
     if (playSound) {
       this.sfxPowerDown.play()
