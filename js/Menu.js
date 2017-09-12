@@ -51,13 +51,13 @@ Menu.prototype = {
       if (playSound) {
         sfxMenuBack.play()
       }
-      window.location.href = "http://www.darzyx.com/";
+      window.location.href = 'http://www.darzyx.com/'
     })
     this.addMenuOption('GitHub', '24px', gameWidth * 0.90, gameHeight * 0.90, function () {
       if (playSound) {
         sfxMenuBack.play()
       }
-      window.location.href = "https://github.com/josedarioxyz/HiTechLowlife";
+      window.location.href = 'https://github.com/josedarioxyz/HiTechLowlife'
     })
   },
   addMenuOption: function (text, fontSize, x, y, callback) {

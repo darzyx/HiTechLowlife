@@ -4,7 +4,7 @@
  * Copyright © 2017 Jose Dario Sanchez
  */
 
- /* global game */
+ /* global Phaser, game, gameHeight, gameWidth, music, playMusic, playSound, sfxMenuBack */
 
 var Credits = function () {}
 Credits.prototype = {
