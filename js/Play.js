@@ -1,8 +1,8 @@
 /*
- * Play.js
- * HiTech Lowlife Demo Code
- * Copyright © 2017 Jose Dario Sanchez
- */
+* Play.js
+* HiTech Lowlife Demo Code
+* Copyright © 2017 Jose Dario Sanchez
+*/
 /* global Phaser, PIXI, game, gameWidth, gameHeight, music, playMusic, playSound, sfxMenuForward */
 var player
 var cursors
@@ -14,9 +14,9 @@ var flameThrowerAmmoText
 var rocketAmmoText
 var scoreText
 var score = 0
-  // ==============================================================================
-  // Core Play class
-  // ==============================================================================
+// ==============================================================================
+// Core Play class
+// ==============================================================================
 var Play = function (game) {}
 Play.prototype = {
   init: function () {
@@ -46,7 +46,7 @@ Play.prototype = {
     game.time.reset()
   },
   create: function () {
-      // Order determines relative z-position (back to front)
+// Order determines relative z-position (back to front)
     this.createMap()
     this.createItemsAndObjects()
     this.createWeapons()
@@ -59,22 +59,22 @@ Play.prototype = {
     this.bg.fixedToCamera = true
     this.map = game.add.tilemap('map-lvl-1')
     this.map.addTilesetImage('tileset1', 'tileset1')
-        // Layers
+// Layers
     this.backgroundLayer = this.map.createLayer('backgroundLayer')
     this.collisionLayer = this.map.createLayer('collisionLayer')
     this.decorationLayer = this.map.createLayer('decorationLayer')
-        // Tell phaser which is the collision layer
-    this.map.setCollisionBetween(0, 974, true, this.collisionLayer, true)
-        // Resize world to level size:
+// Tell phaser which is the collision layer
+    this.map.setCollisionBetween(0, 974, true, this.collisionLayer, false)
+// Resize world to level size:
     this.backgroundLayer.resizeWorld()
-        // Level gravity strength
+// Level gravity strength
     game.physics.arcade.gravity.y = 0
     game.stage.smoothed = false
   },
   createItemsAndObjects: function () {
-      // Game objects
+// Game objects
     this.ladders = game.add.group()
-    this.addObjectLadder(115, 22)
+    this.addObjectLadder(86, 46)
     this.platforms = this.add.physicsGroup()
     var platform1 = new ObjectPlatform(game, 67, 30, 'platform', this.platforms)
     platform1.addMotionPath([{
@@ -107,11 +107,14 @@ Play.prototype = {
       yEase: 'Sine.easeOut'
     }])
     this.platforms.callAll('start')
-        // Game items
+// Game items
     this.items = game.add.group()
-        // this.addItemMoney(21, 12);
+    this.addItemMoney(43, 21)
+    this.addItemMoney(43, 23)
+    this.addItemMoney(43, 25)
+    this.addItemMoney(43, 27)
     this.itemsShield = game.add.group()
-    this.addItemShield(10, 6)
+    this.addItemShield(17, 31)
   },
   createWeapons: function () {
     this.weapons.push(new Weapon.Pistol(this.game))
@@ -131,10 +134,13 @@ Play.prototype = {
     this.ghostEnemies = game.add.physicsGroup()
     this.addEnemyNanobot(18, 15)
     this.addEnemyWalker(67, 10)
+    this.addEnemySpiderbot(101, 6)
+    this.addEnemySpiderbot(106, 6)
     this.addEnemyTurret(27, 3)
+    this.addEnemyMutantShocker(229, 25)
   },
   createPlayer: function () {
-    player = game.add.sprite(64, 100, 'zed')
+    player = game.add.sprite(96, 240, 'zed')
     game.physics.enable(player, Phaser.Physics.ARCADE)
     player.body.setSize(24, 45, 12, 3)
     player.anchor.setTo(0.5, 1)
@@ -335,6 +341,8 @@ Play.prototype = {
     }
   },
   updateEnemies: function () {
+    this.normalEnemies.setAll('tint', 0xFFFFFF)
+    this.ghostEnemies.setAll('tint', 0xFFFFFF)
     game.physics.arcade.collide(this.normalEnemies, this.collisionLayer)
     game.physics.arcade.collide(this.normalEnemies, this.normalEnemies)
     game.physics.arcade.collide(this.ghostEnemies, this.ghostEnemies)
@@ -441,7 +449,7 @@ Play.prototype = {
     if (player.willJump) {
       player.willJump = false
       if (this.lockedTo && this.lockedTo.deltaY < 0 && this.wasLocked) {
-          //  If platform is moving up, add its velocity to the players jump
+//  If platform is moving up, add its velocity to the players jump
         player.body.velocity.y = -player.jumpSpeed + (this.lockedTo.deltaY * 10)
       } else {
         player.body.velocity.y = -player.jumpSpeed
@@ -486,6 +494,7 @@ Play.prototype = {
   hurtEnemy: function (enemy, weapon) {
     enemy.health--
     weapon.kill()
+    enemy.tint = 0xFF0000
   },
   debugGame: function () {
     game.debug.body(player)
@@ -498,8 +507,8 @@ Play.prototype = {
     this.collisionLayer.debug = true
   },
   render: function () {
-      // ******* UNCOMMENT TO ENTER DEBUG MODE *******
-      // this.debugGame()
+// ******* UNCOMMENT TO ENTER DEBUG MODE *******
+    // this.debugGame()
   },
   renderGroup: function (member) {
     game.debug.body(member)
@@ -514,7 +523,7 @@ Play.prototype = {
   },
   checkLock: function () {
     player.body.velocity.y = 0
-        //  If player walks off sides of platform then no longer locked to it
+//  If player walks off sides of platform then no longer locked to it
     if (player.body.right < this.lockedTo.body.x || player.body.x > this.lockedTo.body.right) {
       this.cancelLock()
     }
@@ -524,7 +533,7 @@ Play.prototype = {
     this.locked = false
   },
   nextWeapon: function () {
-      //  Tidy-up the current weapon
+//  Tidy-up the current weapon
     if (this.currentWeapon > 9) {
       this.weapons[this.currentWeapon].reset()
     } else {
@@ -532,7 +541,7 @@ Play.prototype = {
       this.weapons[this.currentWeapon].callAll('reset', null, 0, 0)
       this.weapons[this.currentWeapon].setAll('exists', false)
     }
-      //  Activate the new one
+//  Activate the new one
     this.currentWeapon++
     if (this.currentWeapon === this.weapons.length) {
       this.currentWeapon = 0
@@ -543,10 +552,10 @@ Play.prototype = {
     sprite.kill()
   }
 }
-  // ==============================================================================
-  // Enemy classes
-  // ==============================================================================
-  // Enemy Walkers
+// ==============================================================================
+// Enemy classes
+// ==============================================================================
+// Enemy Walkers
 var EnemyWalker = function (game, x, y) {
   x *= 16
   y *= 16
@@ -574,7 +583,7 @@ EnemyWalker.prototype.constructor = EnemyWalker
 EnemyWalker.prototype.update = function () {
   if (Math.abs(player.body.position.x - this.body.position.x) < 350 && Math.abs(player.body.position.y - this.body.position.y) < 350) {
     if (!this.playedSFXWalkerVoice) {
-      this.sfxWalkerVoice.play()
+      if (playSound) { this.sfxWalkerVoice.play() }
       this.playedSFXWalkerVoice = true
     }
   }
@@ -594,7 +603,7 @@ EnemyWalker.prototype.update = function () {
     scoreText.text = 'Score: ' + score
   }
 }
-  // Enemy Nanobots
+// Enemy Nanobots
 var EnemyNanobot = function (game, x, y) {
   x *= 16
   y *= 16
@@ -642,7 +651,7 @@ EnemyNanobot.prototype.update = function () {
     scoreText.text = 'Score: ' + score
   }
 }
-  // Enemy Spiderbot
+// Enemy Spiderbot
 var EnemySpiderbot = function (game, x, y) {
   x *= 16
   y *= 16
@@ -680,7 +689,7 @@ EnemySpiderbot.prototype.update = function () {
     scoreText.text = 'Score: ' + score
   }
 }
-  // Enemy Turrets
+// Enemy Turrets
 var EnemyTurret = function (game, x, y) {
   x *= 16
   y *= 16
@@ -716,7 +725,7 @@ EnemyTurret.prototype.update = function () {
     scoreText.text = 'Score: ' + score
   }
 }
-  // Enemy Spiderbot
+// Enemy Spiderbot
 var EnemyMutantShocker = function (game, x, y) {
   x *= 16
   y *= 16
@@ -762,16 +771,17 @@ EnemyMutantShocker.prototype.update = function () {
     scoreText.text = 'Score: ' + score
   }
 }
-  // ==============================================================================
-  // Item classes
-  // ==============================================================================
-  // Item Money
+// ==============================================================================
+// Item classes
+// ==============================================================================
+// Item Money
 var ItemMoney = function (game, x, y) {
   x *= 16
   y *= 16
   this.scoreValue = 50
   Phaser.Sprite.call(this, game, x, y, 'money-item')
   game.physics.enable(this, Phaser.Physics.ARCADE)
+  this.anchor.set(0.5, 0.5)
   this.enableBody = true
   this.body.setSize(16, 16, 8, 8)
   this.animations.add('hover', [0, 1, 2, 3, 4, 5, 6, 7, 8], 8, true)
@@ -794,13 +804,14 @@ ItemMoney.prototype.update = function () {
     scoreText.text = 'Score: ' + score
   }
 }
-  // Item Shield
+// Item Shield
 var ItemShield = function (game, x, y) {
   x *= 16
   y *= 16
   this.scoreValue = 100
   Phaser.Sprite.call(this, game, x, y, 'shield-item')
   game.physics.enable(this, Phaser.Physics.ARCADE)
+  this.anchor.set(0.5, 0.5)
   this.enableBody = true
   this.body.setSize(16, 16, 0, 0)
   this.sfxPowerUp = game.add.audio('sfx-power-up')
@@ -821,10 +832,10 @@ ItemShield.prototype.update = function () {
     scoreText.text = 'Score: ' + score
   }
 }
-  // ==============================================================================
-  // Object classes
-  // ==============================================================================
-  // Object Ladders
+// ==============================================================================
+// Object classes
+// ==============================================================================
+// Object Ladders
 var ObjectLadder = function (game, x, y) {
   x *= 16
   y *= 16
@@ -832,7 +843,6 @@ var ObjectLadder = function (game, x, y) {
   game.physics.enable(this, Phaser.Physics.ARCADE)
   this.anchor.set(0.5, 1)
   this.enableBody = true
-  this.body.setSize(32, 320, 0, 0)
   this.body.immovable = true
   this.body.allowGravity = false
 }
@@ -846,7 +856,7 @@ ObjectLadder.prototype.update = function () {
     player.isClimbing = false
   }
 }
-  // Moving Platforms — thanks to Richard Davey from Phaser.io for this code!
+// Moving Platforms — thanks to Richard Davey from Phaser.io for this code!
 var ObjectPlatform = function (game, x, y, key, group) {
   x *= 16
   y *= 16
@@ -870,10 +880,10 @@ ObjectPlatform.prototype.constructor = ObjectPlatform
 ObjectPlatform.prototype.addMotionPath = function (motionPath) {
   this.tweenX = game.add.tween(this.body)
   this.tweenY = game.add.tween(this.body)
-    //  motionPath is an array containing objects with this structure
-    //  [
-    //   { x: "+200", xSpeed: 2000, xEase: "Linear", y: "-200", ySpeed: 2000, yEase: "Sine.easeIn" }
-    //  ]
+//  motionPath is an array containing objects with this structure
+//  [
+//   { x: "+200", xSpeed: 2000, xEase: "Linear", y: "-200", ySpeed: 2000, yEase: "Sine.easeIn" }
+//  ]
   for (var i = 0; i < motionPath.length; i++) {
     this.tweenX.to({
       x: motionPath[i].x
@@ -893,9 +903,9 @@ ObjectPlatform.prototype.stop = function () {
   this.tweenX.stop()
   this.tweenY.stop()
 }
-  // ==============================================================================
-  // Weapon classes
-  // ==============================================================================
+// ==============================================================================
+// Weapon classes
+// ==============================================================================
 var Projectile = function (game, key) {
   Phaser.Sprite.call(this, game, 0, 0, key)
   this.texture.baseTexture.scaleMode = PIXI.scaleModes.NEAREST
@@ -1099,7 +1109,7 @@ Weapon.Rockets.prototype.fire = function (source) {
   }
   var x = source.x + (this.dir * source.width / 2)
   var y = source.y - (source.height / 2)
-      // Tween doesn't require this.dir scale flip, simply set to 1
+// Tween doesn't require this.dir scale flip, simply set to 1
   Weapon.fireAmmo(this, x, y, 0, this.dir * this.projectileSpeed, 1, 0, -800, true)
   player.rocketAmmo -= 1
   rocketAmmoText.text = 'Rockets: ' + player.rocketAmmo
@@ -1107,10 +1117,10 @@ Weapon.Rockets.prototype.fire = function (source) {
     this.sfxRocket.play()
   }
 }
-  // ==============================================================================
-  // Powerup classes
-  // ==============================================================================
-  // Powerup Shield
+// ==============================================================================
+// Powerup classes
+// ==============================================================================
+// Powerup Shield
 var PowerupShield = function (game) {
   Phaser.Sprite.call(this, game, player.body.position.x + (player.body.width / 2), player.body.position.y + (player.body.height / 2), 'shield-powerup')
   this.anchor.setTo(0.5, 0.5)

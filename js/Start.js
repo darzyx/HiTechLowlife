@@ -6,6 +6,8 @@
 
 /* global Phaser, game, gameWidth, gameHeight, Start, WebFont, Load */
 
+/* exported game, gameWidth, gameHeight, Start */
+
 var gameWidth = 640
 var gameHeight = 360
 var game = new Phaser.Game(gameWidth, gameHeight, Phaser.CANVAS, 'HiTech Lowlife')

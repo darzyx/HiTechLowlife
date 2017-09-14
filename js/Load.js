@@ -4,13 +4,10 @@
  * Copyright © 2017 Jose Dario Sanchez
  */
 
-/* global Phaser, game, gameWidth, gameHeight, sound, playSound, Menu, Credits, Options, Intro, Play, GameOver */
+/* global Phaser, game, gameWidth, gameHeight, Menu, Credits, Options, Intro, Play, GameOver */
 
 var music
-var sound
 var playMusic = true
-var playSound = true
-var scaleGame = true
 
 var Load = function () {}
 
@@ -180,8 +177,6 @@ Load.prototype = {
     if (playMusic) {
       music.play()
     }
-
-    sound = game.add.audio('sfx-menu-forward')
   },
 
   addSettings: function () {
