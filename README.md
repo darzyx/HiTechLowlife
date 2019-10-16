@@ -2,7 +2,7 @@
 
 A desktop-based 2D platformer pixel art video game level. Written in JavaScript and built using the Phaser library/framework.
 
-[Demo](http://game.darzyx.com/)
+[Demo](https://darzyx.github.io/HiTechLowlife/)
 
 ## Features
 * Web optimized + open source art, music, and sound effects
@@ -39,6 +39,6 @@ Map tiled with Tiled
 
 Thanks for playing!
 
-## License 
+## License
 
 HiTech Lowlife Copyright © 2017 Jose Dario Sanchez
